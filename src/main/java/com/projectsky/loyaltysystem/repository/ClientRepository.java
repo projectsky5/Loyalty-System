@@ -9,23 +9,23 @@ import org.springframework.data.repository.query.Param;
 import java.util.Optional;
 
 public interface ClientRepository extends JpaRepository<Client, Long> {
-    Optional<Client> findByUsername(String username);
-
     boolean existsByUsername(String username);
 
     @Query("""
     SELECT
          c.id,
+         c.username,
+         c.email,
+         c.balance,
          c.bonusPoints,
          c.category,
-         c.username,
          MAX (p.purchaseDate),
          count(p)
     FROM Client c 
     LEFT JOIN Purchase p
         ON c.id = p.client.id
     WHERE c.id = :id
-    GROUP BY c.id, c.bonusPoints, c.category, c.username
+    GROUP BY c.id, c.bonusPoints, c.category, c.username, c.balance, c.username, c.email
     """)
     Optional<ClientFullDto> findClientSummaryById(@Param("id") Long id);
 }

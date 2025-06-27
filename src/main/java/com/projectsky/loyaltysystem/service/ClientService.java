@@ -2,13 +2,18 @@ package com.projectsky.loyaltysystem.service;
 
 import com.projectsky.loyaltysystem.dto.*;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 public interface ClientService {
 
-    ClientIdDto addClient(ClientCreateDto dto);
+    IdDto addClient(ClientCreateDto dto);
+    ClientDto topUpBalance(BalanceDto dto, Long id);
     ClientFullDto getClientById(Long id);
     List<ClientDto> getAllClients();
     ClientFullDto updateClient(ClientUpdateDto dto, Long id);
     void deleteClientById(Long id);
+
+    Integer addPoints(Long id, Integer points);
+    Integer takePoints(Long id, Integer points);
 }

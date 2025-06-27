@@ -19,6 +19,21 @@ public class GlobalExceptionHandler {
         return buildResponseEntity(HttpStatus.CONFLICT, "Client already exists", e.getMessage());
     }
 
+    @ExceptionHandler(PurchaseAlreadyRefundedException.class)
+    public ResponseEntity<ErrorResponse> handlePurchaseAlreadyRefundedException(PurchaseAlreadyRefundedException e) {
+        return buildResponseEntity(HttpStatus.CONFLICT, "Purchase already refunded", e.getMessage());
+    }
+
+    @ExceptionHandler(PurchaseNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handlePurchaseNotFoundException(PurchaseNotFoundException e) {
+        return buildResponseEntity(HttpStatus.NOT_FOUND, "Purchase not found", e.getMessage());
+    }
+
+    @ExceptionHandler(NotEnoughBalanceException.class)
+    public ResponseEntity<ErrorResponse> handleNotEnoughBalanceException(NotEnoughBalanceException e) {
+        return buildResponseEntity(HttpStatus.PAYMENT_REQUIRED, "Not enough balance", e.getMessage());
+    }
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleException(Exception e) {
         return buildResponseEntity(HttpStatus.INTERNAL_SERVER_ERROR, "Internal Server Error", e.getMessage());

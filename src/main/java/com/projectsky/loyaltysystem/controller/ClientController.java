@@ -25,34 +25,43 @@ public class ClientController {
                 : ResponseEntity.ok(allClients);
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("/{clientId}")
     public ResponseEntity<ClientFullDto> getClientById(
-            @PathVariable Long id
+            @PathVariable Long clientId
     ) {
-        return ResponseEntity.ok(clientService.getClientById(id));
+        return ResponseEntity.ok(clientService.getClientById(clientId));
     }
 
     @PostMapping
-    public ResponseEntity<ClientIdDto> createClient(
+    public ResponseEntity<IdDto> createClient(
             @Valid @RequestBody ClientCreateDto dto
     ) {
-        clientService.addClient(dto);
-        return ResponseEntity.status(HttpStatus.CREATED).build();
+        IdDto idDto = clientService.addClient(dto);
+        return ResponseEntity.status(HttpStatus.CREATED).body(idDto);
     }
 
-    @PatchMapping("/{id}")
+    @PatchMapping("/{clientId}")
     public ResponseEntity<ClientFullDto> updateClient(
             @RequestBody ClientUpdateDto dto,
-            @PathVariable Long id
+            @PathVariable Long clientId
     ) {
-        return ResponseEntity.status(HttpStatus.OK).body(clientService.updateClient(dto, id));
+        return ResponseEntity.status(HttpStatus.OK).body(clientService.updateClient(dto, clientId));
     }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteClient(
-            @PathVariable Long id
+    @PatchMapping("/{clientId}/balance")
+    public ResponseEntity<ClientDto> updateBalance(
+            @PathVariable Long clientId,
+            @RequestBody BalanceDto dto
     ) {
-        clientService.deleteClientById(id);
+        return ResponseEntity.ok(clientService.topUpBalance(dto, clientId));
+    }
+
+
+    @DeleteMapping("/{clientId}")
+    public ResponseEntity<Void> deleteClient(
+            @PathVariable Long clientId
+    ) {
+        clientService.deleteClientById(clientId);
         return ResponseEntity.noContent().build();
     }
 }

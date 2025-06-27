@@ -1,6 +1,6 @@
 package com.projectsky.loyaltysystem.dto;
 
-public record ClientIdDto(
+public record IdDto(
         Long id
 ) {
 }

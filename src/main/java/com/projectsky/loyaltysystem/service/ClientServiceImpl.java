@@ -11,6 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 @Service
@@ -22,7 +23,7 @@ public class ClientServiceImpl implements ClientService {
 
     @Override
     @Transactional
-    public ClientIdDto addClient(ClientCreateDto dto) {
+    public IdDto addClient(ClientCreateDto dto) {
         if(clientRepository.existsByUsername(dto.username())){
             log.warn("Попытка создать пользователя с существующим username={}", dto.username());
             throw new ClientAlreadyExistsException("Пользователь уже существует");
@@ -31,6 +32,7 @@ public class ClientServiceImpl implements ClientService {
         Client client = Client.builder()
                 .username(dto.username())
                 .email(dto.email())
+                .balance(BigDecimal.ZERO)
                 .category(Category.BASIC)
                 .bonusPoints(0)
                 .build();
@@ -40,7 +42,23 @@ public class ClientServiceImpl implements ClientService {
 
         log.info("Добавлен пользователь id={}, username={}", id, dto.username());
 
-        return new ClientIdDto(id);
+        return new IdDto(id);
+    }
+
+    @Override
+    @Transactional
+    public ClientDto topUpBalance(BalanceDto dto, Long id) {
+        Client client = clientRepository.findById(id)
+                .orElseThrow(() -> {
+                    log.warn("Клиент с id={} не найден", id);
+                    return new ClientNotFoundException("Пользователь не найден");
+                });
+
+        BigDecimal newBalance = client.getBalance().add(dto.balance());
+        client.setBalance(newBalance);
+
+        clientRepository.save(client);
+        return buildClientDto(client);
     }
 
     @Override
@@ -100,10 +118,51 @@ public class ClientServiceImpl implements ClientService {
         log.info("Удален пользователь с id={}", id);
     }
 
+    @Override
+    @Transactional
+    public Integer addPoints(Long id, Integer points) {
+        log.debug("Попытка начислить баллы={} пользователю с id={}", points, id);
+        Client client = clientRepository.findById(id)
+                .orElseThrow(() -> {
+                    log.warn("Пользователь с id={} не найден", id);
+                    return new ClientNotFoundException("Пользователь не найден");
+                });
+
+        Integer bonusPoints = client.getBonusPoints();
+        bonusPoints += points;
+        client.setBonusPoints(bonusPoints);
+
+        clientRepository.save(client);
+        log.info("Баллы={} успешно начислены пользователю с id={}", points, id);
+
+        return points;
+    }
+
+    @Override
+    @Transactional
+    public Integer takePoints(Long id, Integer points) {
+        log.debug("Попытка списать баллы={} у пользователя с id={}", points, id);
+        Client client = clientRepository.findById(id)
+                .orElseThrow(() -> {
+                    log.warn("Пользователь с id={} не найден", id);
+                    return new ClientNotFoundException("Пользователь не найден");
+                });
+
+        Integer bonusPoints = client.getBonusPoints();
+        bonusPoints -= points;
+        client.setBonusPoints(bonusPoints);
+
+        clientRepository.save(client);
+        log.info("Баллы={} успешно списаны у пользователя с id={}", points, id);
+
+        return points;
+    }
+
     private ClientDto buildClientDto(Client client) {
         return ClientDto.builder()
                 .username(client.getUsername())
                 .email(client.getEmail())
+                .balance(client.getBalance())
                 .category(client.getCategory().name())
                 .points(client.getBonusPoints())
                 .build();

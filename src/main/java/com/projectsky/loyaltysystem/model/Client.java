@@ -4,6 +4,7 @@ import com.projectsky.loyaltysystem.enums.Category;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 @Entity
@@ -24,6 +25,9 @@ public class Client {
 
     @Column(nullable = false, unique = true)
     private String email;
+
+    @Column(nullable = false)
+    private BigDecimal balance;
 
     @Column(nullable = false)
     private Integer bonusPoints;

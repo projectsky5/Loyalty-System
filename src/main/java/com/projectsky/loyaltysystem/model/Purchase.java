@@ -1,5 +1,6 @@
 package com.projectsky.loyaltysystem.model;
 
+import com.projectsky.loyaltysystem.enums.PurchaseStatus;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -19,9 +20,14 @@ public class Purchase {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    private String name;
+
     private BigDecimal price;
 
     private LocalDateTime purchaseDate;
+
+    @Enumerated(EnumType.STRING)
+    private PurchaseStatus status;
 
     @ManyToOne
     @JoinColumn(name = "client_id")

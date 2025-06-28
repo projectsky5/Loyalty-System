@@ -2,7 +2,6 @@ package com.projectsky.loyaltysystem.service;
 
 import com.projectsky.loyaltysystem.dto.*;
 
-import java.math.BigDecimal;
 import java.util.List;
 
 public interface ClientService {

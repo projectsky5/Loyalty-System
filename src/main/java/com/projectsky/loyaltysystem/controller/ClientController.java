@@ -51,7 +51,7 @@ public class ClientController {
     @PatchMapping("/{clientId}/balance")
     public ResponseEntity<ClientDto> updateBalance(
             @PathVariable Long clientId,
-            @RequestBody BalanceDto dto
+            @RequestBody @Valid BalanceDto dto
     ) {
         return ResponseEntity.ok(clientService.topUpBalance(dto, clientId));
     }

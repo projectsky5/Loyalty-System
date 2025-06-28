@@ -3,6 +3,7 @@ package com.projectsky.loyaltysystem.exception;
 import com.projectsky.loyaltysystem.dto.ErrorResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
@@ -32,6 +33,16 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(NotEnoughBalanceException.class)
     public ResponseEntity<ErrorResponse> handleNotEnoughBalanceException(NotEnoughBalanceException e) {
         return buildResponseEntity(HttpStatus.PAYMENT_REQUIRED, "Not enough balance", e.getMessage());
+    }
+
+    @ExceptionHandler(UsernameAlreadyExistsException.class)
+    public ResponseEntity<ErrorResponse> handleUsernameAlreadyExistsException(UsernameAlreadyExistsException e){
+        return buildResponseEntity(HttpStatus.CONFLICT, "Username already exists", e.getMessage());
+    }
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<ErrorResponse> handleMethodArgumentNotValidException(MethodArgumentNotValidException e) {
+        return buildResponseEntity(HttpStatus.BAD_REQUEST, "Invalid request", e.getMessage());
     }
 
     @ExceptionHandler(Exception.class)

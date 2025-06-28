@@ -24,14 +24,14 @@ public class ClientFullDto {
                          Integer points,
                          Category category,
                          LocalDateTime lastPurchase,
-                         Long totalPurchases) {
+                         Integer totalPurchases) {
         this.id = id;
         this.username = username;
         this.email = email;
         this.balance = balance;
         this.points = points;
-        this.category = category.name(); // или category.toString()
+        this.category = category.name();
         this.lastPurchase = lastPurchase;
-        this.totalPurchases = totalPurchases.intValue(); // или касти где нужно
+        this.totalPurchases = totalPurchases;
     }
 }

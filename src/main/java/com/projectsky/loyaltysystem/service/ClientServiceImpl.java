@@ -4,6 +4,7 @@ import com.projectsky.loyaltysystem.dto.*;
 import com.projectsky.loyaltysystem.enums.Category;
 import com.projectsky.loyaltysystem.exception.ClientAlreadyExistsException;
 import com.projectsky.loyaltysystem.exception.ClientNotFoundException;
+import com.projectsky.loyaltysystem.exception.UsernameAlreadyExistsException;
 import com.projectsky.loyaltysystem.model.Client;
 import com.projectsky.loyaltysystem.repository.ClientRepository;
 import lombok.RequiredArgsConstructor;
@@ -89,7 +90,7 @@ public class ClientServiceImpl implements ClientService {
             if(!client.getUsername().equals(dto.username())
                     && clientRepository.existsByUsername(dto.username())){
                 log.warn("Попытка использовать занятый username={}", dto.username());
-                throw new ClientAlreadyExistsException("Имя уже занято");
+                throw new UsernameAlreadyExistsException("Имя уже занято");
             }
             client.setUsername(dto.username());
         }

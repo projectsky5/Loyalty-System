@@ -9,6 +9,9 @@ import com.projectsky.loyaltysystem.model.Client;
 import com.projectsky.loyaltysystem.repository.ClientRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -48,6 +51,7 @@ public class ClientServiceImpl implements ClientService {
 
     @Override
     @Transactional
+    @CachePut(value = "client", key = "#id")
     public ClientDto topUpBalance(BalanceDto dto, Long id) {
         Client client = clientRepository.findById(id)
                 .orElseThrow(() -> {
@@ -63,6 +67,7 @@ public class ClientServiceImpl implements ClientService {
     }
 
     @Override
+    @Cacheable(value = "client", key = "#id")
     public ClientFullDto getClientById(Long id) {
         return clientRepository.findClientSummaryById(id)
                 .orElseThrow(() -> new ClientNotFoundException("Клиент не найден"));
@@ -77,6 +82,7 @@ public class ClientServiceImpl implements ClientService {
 
     @Override
     @Transactional
+    @CachePut(value = "client", key = "#id")
     public ClientFullDto updateClient(ClientUpdateDto dto, Long id) {
         log.debug("Попытка обновить информацию о пользователе с id={}", id);
         Client client = clientRepository.findById(id)
@@ -98,15 +104,17 @@ public class ClientServiceImpl implements ClientService {
             client.setEmail(dto.email());
         }
 
-        Client saved = clientRepository.save(client);
+        clientRepository.save(client);
 
         log.debug("Обновление информации о пользователе с id={} успешно, новый username={}", id, dto.username());
 
-        return getClientById(saved.getId());
+        return clientRepository.findClientSummaryById(id)
+                .orElseThrow(() -> new ClientNotFoundException("Клиент не найден"));
     }
 
     @Override
     @Transactional
+    @CacheEvict(value = "client", key = "#id")
     public void deleteClientById(Long id) {
         log.debug("Попытка удалить пользователя с id={}", id);
         Client client = clientRepository.findById(id)
@@ -121,6 +129,7 @@ public class ClientServiceImpl implements ClientService {
 
     @Override
     @Transactional
+    @CachePut(value = "client", key = "#id")
     public Integer addPoints(Long id, Integer points) {
         log.debug("Попытка начислить баллы={} пользователю с id={}", points, id);
         Client client = clientRepository.findById(id)
@@ -141,6 +150,7 @@ public class ClientServiceImpl implements ClientService {
 
     @Override
     @Transactional
+    @CachePut(value = "client", key = "#id")
     public Integer takePoints(Long id, Integer points) {
         log.debug("Попытка списать баллы={} у пользователя с id={}", points, id);
         Client client = clientRepository.findById(id)

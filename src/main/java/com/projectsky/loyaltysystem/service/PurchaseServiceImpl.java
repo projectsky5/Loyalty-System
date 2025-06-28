@@ -15,12 +15,15 @@ import com.projectsky.loyaltysystem.repository.ClientRepository;
 import com.projectsky.loyaltysystem.repository.PurchaseRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.CacheManager;
+import org.springframework.cache.annotation.CachePut;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -30,6 +33,7 @@ public class PurchaseServiceImpl implements PurchaseService {
     private final PurchaseRepository purchaseRepository;
     private final ClientRepository clientRepository;
     private final ClientService clientService;
+    private final CacheManager cacheManager;
 
     @Override
     @Transactional
@@ -99,20 +103,24 @@ public class PurchaseServiceImpl implements PurchaseService {
             throw new PurchaseAlreadyRefundedException("Операция уже отменена");
         }
 
+        Long clientId = purchase.getClient().getId();
+
         clientService.topUpBalance(new BalanceDto(
                 purchase.getPrice()),
-                purchase.getClient().getId()
+                clientId
         );
         log.debug("Возврат средств за покупку с id = {} прошел успешно", id);
 
         Integer points = calculatePoints(purchase.getPrice());
 
-        clientService.takePoints(purchase.getClient().getId(), points);
+        clientService.takePoints(clientId, points);
         log.debug("Баллы за покупку id={} успешно списаны", id);
 
         purchase.setStatus(PurchaseStatus.REFUNDED);
 
         purchaseRepository.save(purchase);
+        Optional.ofNullable(cacheManager.getCache("client"))
+                        .ifPresent(cache -> cache.evict(clientId));
         log.info("Возврат средств за покупку id={} прошел успешно", id);
     }
 
